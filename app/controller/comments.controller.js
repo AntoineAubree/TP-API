@@ -17,7 +17,7 @@ exports.create = async (req, res) => {
                     if (student) {
                         if (req.body.bodyText) {
                             let comment = await DbComment.create({ bodyText: req.body.bodyText });
-                            await comment.setLesson(publication);
+                            await comment.setPublication(publication);
                             await comment.setStudent(student);
                             res.json({ comment });
                         } else {
@@ -33,7 +33,7 @@ exports.create = async (req, res) => {
                     if (teacher) {
                         if (req.body.bodyText) {
                             let comment = await DbComment.create({ bodyText: req.body.bodyText });
-                            await comment.setLesson(publication);
+                            await comment.setPublication(publication);
                             await comment.setTeacher(teacher);
                             res.json({ comment });
                         } else {
