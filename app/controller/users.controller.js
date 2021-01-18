@@ -187,3 +187,20 @@ exports.createSudentOrTeacher = async (req, res) => {
         res.json({ "message": " access denied " });
     }
 }
+
+exports.getMe = async (req, res) => {
+    let token = req.headers['x-access-token'];
+    let verifytoken = await jwt.verifyToken(token);
+    if (verifytoken) {
+        try {
+            let user = await DbUser.findByPk(verifytoken);
+            res.json(user);
+        } catch (error) {
+            res.status(500)
+            res.json({ 'message': `there was an error : ${error}` });
+        }
+    } else {
+        res.status(401);
+        res.json({ "message": " access denied " });
+    }
+}

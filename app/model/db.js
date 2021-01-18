@@ -29,8 +29,10 @@ db.teachers.belongsToMany(db.lessons, { through: 'LessonTeachers' });
 db.lessons.belongsToMany(db.teachers, { through: 'LessonTeachers' });
 db.students.belongsToMany(db.lessons, { through: 'LessonStudents' });
 db.lessons.belongsToMany(db.students, { through: 'LessonStudents' });
-db.users.hasOne(db.publications);
-db.publications.belongsTo(db.users);
+db.students.hasOne(db.publications);
+db.publications.belongsTo(db.students);
+db.teachers.hasOne(db.publications);
+db.publications.belongsTo(db.teachers);
 db.lessons.hasOne(db.publications);
 db.publications.belongsTo(db.lessons);
 

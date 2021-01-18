@@ -7,5 +7,6 @@ router.post('/register', usersController.register);
 router.post('/me/modify-email', usersController.updateEmail);
 router.delete('/me/delete', usersController.remove);
 router.post('/me', usersController.createSudentOrTeacher);
+router.get('/me', usersController.getMe);
 
 module.exports = router;
