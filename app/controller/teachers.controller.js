@@ -11,10 +11,12 @@ exports.create = async (req, res) => {
         } catch (error) {
             res.status(500)
             res.json({ 'message': `there was an error : ${error}` });
+            return false;
         }
     } else {
         res.status(400);
         res.json({ 'message': 'bad query' });
+        return false;
     }
 }
 

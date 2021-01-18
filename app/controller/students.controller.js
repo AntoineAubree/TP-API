@@ -5,7 +5,6 @@ const DbStudent = db.students;
 const DbLesson = db.lessons;
 const studentsService = require("../service/students.service.js");
 const Student = require("../model/student.js");
-const { lessons } = require("../model/db.js");
 
 exports.create = async (req, res) => {
     if (req.body.firstName && req.body.lastName && req.body.bio && req.body.level && req.body.birthdate) {
@@ -15,10 +14,12 @@ exports.create = async (req, res) => {
         } catch (error) {
             res.status(500)
             res.json({ 'message': `there was an error ici : ${error}` });
+            return false;
         }
     } else {
         res.status(400);
-        res.json({ 'message': 'bad query' });
+        res.json({ 'message': 'bad query ici' });
+        return false;
     }
 }
 

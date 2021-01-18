@@ -146,12 +146,14 @@ exports.createSudentOrTeacher = async (req, res) => {
                     });
                 } else {
                     student = await studentController.create(req, res);
-                    await user.setStudent(student);
-                    res.json({
-                        user: user,
-                        student: student,
-                        token: token,
-                    });
+                    if (student) {
+                        await user.setStudent(student);
+                        res.json({
+                            user: user,
+                            student: student,
+                            token: token,
+                        });
+                    }
                 }
             }
             // user.type === 2 if user is teacher
@@ -166,12 +168,14 @@ exports.createSudentOrTeacher = async (req, res) => {
                     });
                 } else {
                     teacher = await teacherController.create(req, res);
-                    await user.setTeacher(teacher);
-                    res.json({
-                        user: user,
-                        teacher: teacher,
-                        token: token,
-                    });
+                    if (teacher) {
+                        await user.setTeacher(teacher);
+                        res.json({
+                            user: user,
+                            teacher: teacher,
+                            token: token,
+                        });
+                    }
                 }
             }
         } catch (error) {

@@ -4,6 +4,7 @@ const lessonsModel = require("./lessons.model.js")
 const usersModel = require("./users.model.js")
 const studentsModel = require("./students.model.js")
 const teachersModel = require("./teachers.model.js")
+const publicationsModel = require("./publications.model.js");
 
 const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
     host: dbConfig.HOST,
@@ -17,6 +18,7 @@ let db = {
     users: usersModel(sequelize, Sequelize),
     students: studentsModel(sequelize, Sequelize),
     teachers: teachersModel(sequelize, Sequelize),
+    publications: publicationsModel(sequelize, Sequelize),
 }
 
 db.users.hasOne(db.students);
@@ -27,5 +29,9 @@ db.teachers.belongsToMany(db.lessons, { through: 'LessonTeachers' });
 db.lessons.belongsToMany(db.teachers, { through: 'LessonTeachers' });
 db.students.belongsToMany(db.lessons, { through: 'LessonStudents' });
 db.lessons.belongsToMany(db.students, { through: 'LessonStudents' });
+db.users.hasOne(db.publications);
+db.publications.belongsTo(db.users);
+db.lessons.hasOne(db.publications);
+db.publications.belongsTo(db.lessons);
 
 module.exports = db;

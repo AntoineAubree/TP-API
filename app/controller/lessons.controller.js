@@ -59,47 +59,85 @@ exports.getAll = async (req, res) => {
 }
 
 exports.update = async (req, res) => {
-    if (req.body.title && req.body.hours && req.body.description && req.body.teacher && req.body.fileName && req.body.startingDate && req.body.endingDate) {
+    let token = req.headers['x-access-token'];
+    let verifytoken = await jwt.verifyToken(token);
+    if (verifytoken) {
         try {
-            let lesson = await DbLesson.update(
-                req.body,
-                { where: { id: req.params.id }, }
-            );
-            if (lesson.includes(1)) {
-                res.json({ id: req.params.id, ...req.body });
+            let lesson = await DbLesson.findByPk(req.params.id);
+            if (lesson) {
+                let teachers = await lesson.getTeachers();
+                let ifTeacher = false;
+                for (const teacher of teachers) {
+                    if (teacher.id == verifytoken) {
+                        ifTeacher = true;
+                        break;
+                    }
+                }
+                if (ifTeacher) {
+                    if (req.body.title && req.body.hours && req.body.description && req.body.fileName && req.body.startingDate && req.body.endingDate) {
+                        await DbLesson.update(
+                            req.body,
+                            { where: { id: req.params.id }, }
+                        );
+                        res.json({ id: req.params.id, ...req.body });
+                    } else {
+                        res.status(400);
+                        res.json({ 'message': 'bad query' });
+                    }
+                } else {
+                    res.status(401);
+                    res.json({ "message": " access denied" });
+                }
             } else {
-                this.create(req, res);
+                res.status(404);
+                res.json({ "message": "Lesson not found" });
             }
         } catch (error) {
             res.status(500)
             res.json({ 'message': `there was an error : ${error}` });
         }
     } else {
-        res.status(400);
-        res.json({ 'message': 'bad query' });
+        res.status(401);
+        res.json({ "message": " access denied " });
     }
 }
 
 exports.remove = async (req, res) => {
-    if (req.params.id) {
+    let token = req.headers['x-access-token'];
+    let verifytoken = await jwt.verifyToken(token);
+    if (verifytoken) {
         try {
-            let lesson = await DbLesson.destroy({
-                where: {
-                    id: req.params.id,
-                }
-            });
+            let lesson = await DbLesson.findByPk(req.params.id);
             if (lesson) {
-                res.json({ 'message': `deleted lesson with id : ${req.params.id}` });
+                let teachers = await lesson.getTeachers();
+                let ifTeacher = false;
+                for (const teacher of teachers) {
+                    if (teacher.id == verifytoken) {
+                        ifTeacher = true;
+                        break;
+                    }
+                }
+                if (ifTeacher) {
+                    await DbLesson.destroy({
+                        where: {
+                            id: req.params.id,
+                        }
+                    });
+                    res.json({ 'message': `deleted lesson with id : ${req.params.id}` });
+                } else {
+                    res.status(401);
+                    res.json({ "message": " access denied" });
+                }
             } else {
-                res.status(404)
-                res.json({ 'message': 'lesson not found' });
+                res.status(404);
+                res.json({ "message": "Lesson not found" });
             }
         } catch (error) {
             res.status(500)
             res.json({ 'message': `there was an error : ${error}` });
         }
     } else {
-        res.status(400);
-        res.json({ 'message': 'bad query' });
+        res.status(401);
+        res.json({ "message": " access denied " });
     }
 }
