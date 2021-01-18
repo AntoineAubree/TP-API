@@ -20,6 +20,26 @@ exports.create = async (req, res) => {
     }
 }
 
+exports.update = async (req, res) => {
+    if (req.body.firstName && req.body.lastName && req.body.bio && req.body.subject) {
+        try {
+            let teacher = await DbTeacher.update(
+                req.body,
+                { where: { id: req.params.id }, }
+            );
+            return teacher;
+        } catch (error) {
+            res.status(500)
+            res.json({ 'message': `there was an error : ${error}` });
+            return false;
+        }
+    } else {
+        res.status(400);
+        res.json({ 'message': 'bad query' });
+        return false;
+    }
+}
+
 exports.getAll = async (req, res) => {
     let token = req.headers['x-access-token'];
     let verifytoken = await jwt.verifyToken(token);

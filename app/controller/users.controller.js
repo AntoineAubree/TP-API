@@ -102,6 +102,45 @@ exports.updateEmail = async (req, res) => {
     }
 }
 
+exports.updatePassword = async (req, res) => {
+    let token = req.headers['x-access-token'];
+    let verifytoken = await jwt.verifyToken(token);
+    if (verifytoken) {
+        try {
+            let user = await DbUser.findByPk(verifytoken);
+            if (user) {
+                if (req.body.oldPassword, req.body.newPassword) {
+                    console.log(req.body.oldPassword);
+                    console.log(user.password);
+                    if (req.body.oldPassword == user.password) {
+                        console.log('ici');
+                        await DbUser.update(
+                            { password: req.body.newPassword },
+                            { where: { id: verifytoken }, }
+                        );
+                        res.json({ id: verifytoken, email: user.email, password: req.body.newPassword });
+                    } else {
+                        res.status(401);
+                        res.json({ "message": 'wrong password' });
+                    }
+                } else {
+                    res.status(400);
+                    res.json({ 'message': 'bad query' });
+                }
+            } else {
+                res.status(404);
+                res.json({ 'message': 'user not found' });
+            }
+        } catch (error) {
+            res.status(500)
+            res.json({ 'message': `there was an error : ${error}` });
+        }
+    } else {
+        res.status(401);
+        res.json({ "message": " access denied " });
+    }
+}
+
 exports.remove = async (req, res) => {
     let token = req.headers['x-access-token'];
     let verifytoken = await jwt.verifyToken(token);
@@ -175,6 +214,64 @@ exports.createSudentOrTeacher = async (req, res) => {
                             teacher: teacher,
                             token: token,
                         });
+                    }
+                }
+            }
+        } catch (error) {
+            res.status(500)
+            res.json({ 'message': `there was an error : ${error}` });
+        }
+    } else {
+        res.status(401);
+        res.json({ "message": " access denied " });
+    }
+}
+
+exports.updateStudentOrTeacher = async (req, res) => {
+    let token = req.headers['x-access-token'];
+    let verifytoken = await jwt.verifyToken(token);
+    if (verifytoken) {
+        try {
+            let user = await DbUser.findByPk(verifytoken);
+            // user.type === 1 if user is student
+            if (user.type === 1) {
+                let student = await user.getStudent();
+                if (!student) {
+                    this.createSudentOrTeacher(req, res);
+                } else {
+                    if (student.id == req.params.id) {
+                        student = await studentController.update(req, res);
+                        if (student) {
+                            res.json({
+                                user: user,
+                                student: student,
+                                token: token,
+                            });
+                        }
+                    } else {
+                        res.status(401);
+                        res.json({ "message": " access denied " });
+                    }
+                }
+            }
+            // user.type === 2 if user is teacher
+            else if (user.type === 2) {
+                let teacher = await user.getTeacher();
+                if (!teacher) {
+                    this.createSudentOrTeacher(req, res);
+                } else {
+                    if (teacher.id == req.params.id) {
+                        teacher = await teacherController.update(req, res);
+                        if (teacher) {
+                            res.json({
+                                user: user,
+                                teacher: teacher,
+                                token: token,
+                            });
+                        }
+                    } else {
+                        res.status(401);
+                        res.json({ "message": " access denied " });
                     }
                 }
             }
