@@ -143,3 +143,74 @@ exports.enroll = async (req, res) => {
         res.json({ "message": " access denied " });
     }
 }
+
+exports.addFriend = async (req, res) => {
+    let token = req.headers['x-access-token'];
+    let verifytoken = await jwt.verifyToken(token);
+    if (verifytoken) {
+        try {
+            let user = await DbUser.findByPk(verifytoken);
+            if (user.dataValues.type == 1) {
+                let student = await user.getStudent();
+                if (student) {
+                    let studentFriend = await DbStudent.findByPk(req.params.id);
+                    if (studentFriend) {
+                        await student.addStudent(studentFriend);
+                        res.json(studentFriend);
+                    } else {
+                        res.status(404);
+                        res.json({ "message": "Friend not found" });
+                    }
+                } else {
+                    res.status(401);
+                    res.json({ "message": "You first need to create your Student profile" });
+                }
+            } else {
+                res.status(401);
+                res.json({ "message": " access only for students " });
+            }
+        } catch (error) {
+            res.status(500)
+            res.json({ 'message': `there was an error : ${error}` });
+        }
+    } else {
+        res.status(401);
+        res.json({ "message": " access denied " });
+    }
+}
+
+exports.removeFriend = async (req, res) => {
+    let token = req.headers['x-access-token'];
+    let verifytoken = await jwt.verifyToken(token);
+    if (verifytoken) {
+        try {
+            let user = await DbUser.findByPk(verifytoken);
+            if (user.dataValues.type == 1) {
+                let student = await user.getStudent();
+                if (student) {
+                    let studentFriend = await DbStudent.findByPk(req.params.id);
+                    if (studentFriend) {
+                        await student.removeStudent(studentFriend);
+                        res.json({ 'message': `Student with id : ${req.params.id} removed from your frienship` });
+                    } else {
+                        res.status(404);
+                        res.json({ "message": "Friend not found" });
+                    }
+                } else {
+                    res.status(401);
+                    res.json({ "message": "You first need to create your Student profile" });
+                }
+            } else {
+                res.status(401);
+                res.json({ "message": " access only for students " });
+            }
+        } catch (error) {
+            res.status(500)
+            res.json({ 'message': `there was an error : ${error}` });
+        }
+    } else {
+        res.status(401);
+        res.json({ "message": " access denied " });
+    }
+}
+
